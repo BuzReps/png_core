@@ -8,13 +8,17 @@ Nothing to see here. Work In Progress
 
 ## Dependencies and tools
 
+### Tools:
 Running tasks: [Make](Makefile)  
 Build tool: [CMake](https://cmake.org)  
 Dependency manager: [vcpkg](https://vcpkg.io)  
-PNG's compressing algorithm: [zlib](https://www.zlib.net) (managed by vcpkg)  
 Documentation generation: [Doxygen](https://www.doxygen.nl) [optional]  
+  * Also [GraphWiz](https://graphviz.org/) for graphs generation [optional]  
 Testing framework: [GoogleTest](https://github.com/google/googletest) [optional]  
 Code formatting: [ClangFormat](https://clang.llvm.org/docs/ClangFormat.html) [optional]  
+
+### png_core's dependencies:
+* PNG's compressing algorithm [zlib](https://www.zlib.net) (managed by vcpkg)  
 
 ## Setup, building and workflow
 
@@ -27,4 +31,9 @@ Visual studio should do the job
 Run `make init` once to setup project  
 Run `make configure` to configure and generate build targets  
 Run `make build` to build project  
-Run `make clean` to remove all build files and artifacts  
+* Artifacts will appear in `install` folder  
+Run `make clean` to remove all generated files and artifacts  
+Run `make generate_docs` to generate documentation  
+* Docs will appear in `documentation` folder  
+  * Open `documentation/html/index.html` in browser)  
+

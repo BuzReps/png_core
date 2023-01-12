@@ -1,5 +1,6 @@
 OUT_DIR := out
 INSTALL_DIR := install
+DOCS_DIR := documentation
 
 help:
 	@echo "make help - Print this message"
@@ -28,10 +29,10 @@ build:
 clean:
 	rm -rf $(OUT_DIR)
 	rm -rf $(INSTALL_DIR)
+	rm -rf $(DOCS_DIR)
 
 generate_docs:
-	# TODO
-	$(error Not implemented)
+	doxygen Doxyfile
 
 run_tests:
 	# TODO

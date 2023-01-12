@@ -2,17 +2,9 @@
 
 A C11 library and a GUI tool for [PNG](https://www.w3.org/TR/png-3/) images editing
 
-## TODO
+## Project status
 
-* Update code style and .clang-format
-* Build configurations: Debug and Release
-* Doxygen config
-* README: Features and usage examples
-* Gui tool
-* Header-only version?
-* Packaging (+ .cmake)
-* Tests
-* LICENSE
+Nothing to see here. Work In Progress
 
 ## Dependencies and tools
 

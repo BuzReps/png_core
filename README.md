@@ -32,9 +32,9 @@ Visual studio should do the job
 * Run `make init` once to setup project  
 * Run `make configure` to configure and generate build targets  
 * Run `make build` to build project  
-  * Artifacts will appear in `install` folder  
-* Run `make clean` to remove all generated files and artifacts  
+  * Artifacts will appear in `out/install` folder  
 * Run `make generate_docs` to generate documentation  
-  * Docs will appear in `documentation` folder  
-  * Open `documentation/html/index.html` in browser  
+  * Docs will appear in `out/docs` folder  
+  * Open `out/docs/png_core/html/index.html` in browser  
+* Run `make clean` to remove all generated files and artifacts  
 

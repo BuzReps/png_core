@@ -1,6 +1,4 @@
 OUT_DIR := out
-INSTALL_DIR := install
-DOCS_DIR := documentation
 
 help:
 	@echo "make help - Print this message"
@@ -24,15 +22,13 @@ configure:
 
 build:
 	cmake --build $(OUT_DIR)
-	cmake --install $(OUT_DIR) --prefix $(INSTALL_DIR)
+	cmake --install $(OUT_DIR)
+
+generate_docs:
+	cmake --build $(OUT_DIR) --target generate_docs
 
 clean:
 	rm -rf $(OUT_DIR)
-	rm -rf $(INSTALL_DIR)
-	rm -rf $(DOCS_DIR)
-
-generate_docs:
-	doxygen Doxyfile
 
 run_tests:
 	# TODO

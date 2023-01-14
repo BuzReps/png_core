@@ -33,7 +33,7 @@ struct PNGRawChunk* PNGCreateFromDatastream(void* data, int data_size) {
     new_chunk->length = *(const uint32_t*)(current_ptr);
     current_ptr += sizeof(uint32_t);
     if (PNG_IS_LITTLE_ENDIAN)
-      InvertBytes(&new_chunk->length, sizeof(uint32_t));
+      FlipBytesInBuffer(&new_chunk->length, sizeof(uint32_t));
 
     for (int i = 0; i < 4; ++i) {
       new_chunk->type.byte_array[i] = *current_ptr;
@@ -52,7 +52,7 @@ struct PNGRawChunk* PNGCreateFromDatastream(void* data, int data_size) {
     new_chunk->crc = *(const uint32_t*)current_ptr;
     current_ptr += sizeof(uint32_t);
     if (PNG_IS_LITTLE_ENDIAN)
-      InvertBytes(&new_chunk->crc, sizeof(uint32_t));
+      FlipBytesInBuffer(&new_chunk->crc, sizeof(uint32_t));
 
     if (!last_chunk) {
       chunks_list = new_chunk;

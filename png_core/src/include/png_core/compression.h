@@ -1,9 +1,13 @@
 #pragma once
 
-#include "png_core.h"
-
 #include <stdbool.h>
 #include <stdint.h>
+
+#include "png_core.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 enum PNGCompressionMethod {
   PNG_COMPRESSION_METHOD_0 = 0
@@ -18,3 +22,6 @@ typedef uint8_t* (*PNGDataDecompressionFunction)(const uint8_t* compressed, int 
 
 PNG_CORE_API PNGDataDecompressionFunction PNGGetDataDecompressionFunction(uint8_t compression_method);
 
+#ifdef __cplusplus
+}  // extern "C"
+#endif

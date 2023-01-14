@@ -4,6 +4,10 @@
 #include "pixel_format.h"
 #include "png_core.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern const int8_t s_png_valid_bit_depths[5];
 extern const int8_t s_png_valid_color_types[5];
 
@@ -18,5 +22,8 @@ PNG_CORE_API void PNGInitRawImage(struct PNGRawImage* obj);
 
 PNG_CORE_API int PNGGetPlainImageSizeBits(const struct PNGChunkData_IHDR* header);
 
-PNG_CORE_API bool PNGGetRawImage(struct PNGRawChunk* chunk_list, struct PNGRawImage * out);
+PNG_CORE_API bool PNGGetRawImage(struct PNGRawChunk* chunk_list, struct PNGRawImage* out);
 
+#ifdef __cplusplus
+}  // extern "C"
+#endif

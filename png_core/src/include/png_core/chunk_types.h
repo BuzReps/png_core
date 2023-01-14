@@ -5,6 +5,10 @@
 
 #include "png_core.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct ChunkType {
   union {
     struct {
@@ -59,3 +63,7 @@ inline bool IsChunkTypeReservedBitSet(struct ChunkType type) {
 inline bool IsChunkTypeSafeToCopy(struct ChunkType type) {
   return type.byte4 | (1 << 5);
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif

@@ -57,8 +57,8 @@ struct PNGChunkData_IHDR *PNGLoadData_IHDR(const uint8_t *data, int data_size) {
   memcpy(&out->bit_depth, data, 5);
 
   if (PNG_IS_LITTLE_ENDIAN) {
-    InvertBytes(&out->width, sizeof(int32_t));
-    InvertBytes(&out->height, sizeof(int32_t));
+    FlipBytesInBuffer(&out->width, sizeof(int32_t));
+    FlipBytesInBuffer(&out->height, sizeof(int32_t));
   }
 
   return out;
@@ -203,7 +203,7 @@ struct PNGChunkData_gAMA *PNGLoadData_gAMA(const uint8_t *data, int data_size) {
 
   out->gamma = *(const uint32_t *)data;
   if (PNG_IS_LITTLE_ENDIAN)
-    InvertBytes(&out->gamma, sizeof(uint32_t));
+    FlipBytesInBuffer(&out->gamma, sizeof(uint32_t));
 
   return out;
 }
@@ -232,8 +232,8 @@ struct PNGChunkData_pHYs *PNGLoadData_pHYs(const uint8_t *data, int data_size) {
   data += sizeof(uint32_t);
   out->unit = *data;
   if (PNG_IS_LITTLE_ENDIAN) {
-    InvertBytes(&out->x_pixels_per_unit, sizeof(uint32_t));
-    InvertBytes(&out->y_pixels_per_unit, sizeof(uint32_t));
+    FlipBytesInBuffer(&out->x_pixels_per_unit, sizeof(uint32_t));
+    FlipBytesInBuffer(&out->y_pixels_per_unit, sizeof(uint32_t));
   }
 
   return out;

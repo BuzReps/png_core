@@ -1,8 +1,12 @@
 #pragma once
 
+#include <stdint.h>
+
 #include "png_core.h"
 
-#include <stdint.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 enum PNGImageType {
   /* Each pixel is a greyscale sample */
@@ -20,9 +24,12 @@ enum PNGImageType {
 PNG_CORE_API int PNGGetChannelCount(enum PNGImageType image_type);
 
 /*
-* Get list of allowed bit depths
-* @param[out] out_depths Buffer to write allowed bit depths into. Can be NULL
-* @return Amount of allowed bit depths
-*/
-PNG_CORE_API int PNGGetAllowedBitDepths(enum PNGImageType image_type, uint8_t * out_depths);
+ * Get list of allowed bit depths
+ * @param[out] out_depths Buffer to write allowed bit depths into. Can be NULL
+ * @return Amount of allowed bit depths
+ */
+PNG_CORE_API int PNGGetAllowedBitDepths(enum PNGImageType image_type, uint8_t* out_depths);
 
+#ifdef __cplusplus
+}  // extern "C"
+#endif

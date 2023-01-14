@@ -6,6 +6,10 @@
 #include "chunk_data.h"
 #include "png_core.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum PNGFilteringMethod {
   PNG_FILTERING_METHOD_0 = 0
 };
@@ -30,3 +34,7 @@ PNG_CORE_API PNGDataDefilteringFunction PNGGetDefilteringFunction(uint8_t filter
  * @return -1 if error. Otherwise size of a plain image after filtering stage
  */
 PNG_CORE_API int PNGGetFilteredImageSizeBytes(const struct PNGChunkData_IHDR* header);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif

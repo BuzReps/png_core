@@ -18,11 +18,11 @@ extern const int32_t s_png_max_chunk_data_length;
 typedef void* (*PNGChunkDataStructLoadFunc)(const uint8_t* /* data */, int /* data_size */);
 
 /*
-* Function that writes chunk data into buffer 'out' in network-ordered format
-* @note Call with NULL 'out' to get size
-* @param[out] out Datastream buffer. Should contain enough space to contain chunk data. Can be NULL
-* @return Amount of bytes written
-*/
+ * Function that writes chunk data into buffer 'out' in network-ordered format
+ * @note Call with NULL 'out' to get size
+ * @param[out] out Datastream buffer. Should contain enough space to contain chunk data. Can be NULL
+ * @return Amount of bytes written
+ */
 typedef int (*PNGChunkDataStructWriteFunc)(const void* /* data */, uint8_t* /* out */);
 
 /* Function that frees chunk data structure */
@@ -196,6 +196,5 @@ PNG_CORE_API void PNGInitRawChunk(struct PNGRawChunk* obj);
 PNG_CORE_API void PNGFreeRawChunkList(struct PNGRawChunk* node);
 
 #ifdef __cplusplus
-} // extern "C"
+}  // extern "C"
 #endif
-

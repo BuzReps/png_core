@@ -23,11 +23,16 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Make 'cmake/*.cmake' modules visible for `include(...)` function
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-# Dependencies lookup
-find_package(ZLIB REQUIRED)
-
 # Build targets
+find_package(ZLIB REQUIRED)
 add_subdirectory(png_core)
+
+# Testing
+find_package(GTest)
+if(GTest_FOUND)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
 
 # Documentation generation targets
 include(generate_docs) # cmake/generate_docs.cmake

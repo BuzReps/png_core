@@ -36,5 +36,6 @@ Visual studio should do the job
 * Run `make generate_docs` to generate documentation  
   * Docs will appear in `out/docs` folder  
   * Open `out/docs/png_core/html/index.html` in browser  
+* Run `make run_tests` to to run tests  
 * Run `make clean` to remove all generated files and artifacts  
 

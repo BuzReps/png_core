@@ -6,6 +6,10 @@
 #include "chunk_types.h"
 #include "png_core.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Png datastream signature */
 extern const uint8_t s_png_signature[8];
 extern const int32_t s_png_max_chunk_data_length;
@@ -190,3 +194,8 @@ struct PNGRawChunk {
 PNG_CORE_API void PNGInitRawChunk(struct PNGRawChunk* obj);
 
 PNG_CORE_API void PNGFreeRawChunkList(struct PNGRawChunk* node);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+

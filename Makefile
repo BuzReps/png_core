@@ -31,6 +31,5 @@ clean:
 	rm -rf $(OUT_DIR)
 
 run_tests:
-	# TODO
-	$(error Not implemented)
+	cd out; ctest
 

@@ -82,6 +82,7 @@ PNG_CORE_API void PNGInitChunkDataStructFunctions(struct PNGChunkDataStructFunct
  * Get function set for chunk data struct of specific type
  * @param[in] type Chunk type
  * @return Function set for chunk data type.
+ * Returns function set for UnknownData chunk data type if type noes not matches any supported chunk data type.
  */
 struct PNGChunkDataStructFunctions PNGGetChunkDataStructFunctions(struct ChunkType type);
 

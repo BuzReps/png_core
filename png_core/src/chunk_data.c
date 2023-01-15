@@ -44,6 +44,9 @@ struct PNGChunkDataStructFunctions PNGGetChunkDataStructFunctions(struct ChunkTy
 
   struct PNGChunkDataStructFunctions functions;
   PNGInitChunkDataStructFunctions(&functions);
+  functions.load_func = (PNGChunkDataStructLoadFunc)PNGLoadData_UnknownData;
+  functions.write_func = (PNGChunkDataStructWriteFunc)PNGWriteData_UnknownData;
+  functions.free_func = (PNGChunkDataStructFreeFunc)PNGFreeData_UnknownData;
   return functions;
 }
 

@@ -1,11 +1,13 @@
 #include "png_core/filtering.h"
-#include "png_core/chunk_data.h"
-#include "png_core/decoder.h"
 
 #include <assert.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
+
+#include "png_core/chunk_data.h"
+#include "png_core/decoder.h"
 
 enum Filter0FuncType {
   NONE = 0,
@@ -126,4 +128,3 @@ int PNGGetFilteredImageSizeBytes(const struct PNGChunkData_IHDR* header) {
   }
   return -1;
 }
-

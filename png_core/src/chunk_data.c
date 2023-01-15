@@ -12,6 +12,8 @@ const uint8_t s_png_signature[8] = {137, 80, 78, 71, 13, 10, 26, 10};
 const int32_t s_png_max_chunk_data_size_bytes = INT32_MAX;
 
 void PNGInitChunkDataStructFunctions(struct PNGChunkDataStructFunctions *obj) {
+  obj->alloc_func = NULL;
+  obj->init_func = NULL;
   obj->load_func = NULL;
   obj->write_func = NULL;
   obj->free_func = NULL;
@@ -25,6 +27,8 @@ struct PNGChunkDataStructFunctions PNGGetChunkDataStructFunctions(struct ChunkTy
   if (type.bytes == CHUNK_##chunk_name.bytes) {                                          \
     struct PNGChunkDataStructFunctions functions;                                        \
     PNGInitChunkDataStructFunctions(&functions);                                         \
+    functions.alloc_func = (PNGChunkDataStructAllocateFunc)PNGAllocateData_##chunk_name; \
+    functions.init_func = (PNGChunkDataStructInitFunc)PNGInitData_##chunk_name;          \
     functions.load_func = (PNGChunkDataStructLoadFunc)PNGLoadData_##chunk_name;          \
     functions.write_func = (PNGChunkDataStructWriteFunc)PNGWriteData_##chunk_name;       \
     functions.free_func = (PNGChunkDataStructFreeFunc)PNGFreeData_##chunk_name;          \
@@ -44,10 +48,42 @@ struct PNGChunkDataStructFunctions PNGGetChunkDataStructFunctions(struct ChunkTy
 
   struct PNGChunkDataStructFunctions functions;
   PNGInitChunkDataStructFunctions(&functions);
+  functions.alloc_func = (PNGChunkDataStructAllocateFunc)PNGAllocateData_UnknownData;
+  functions.init_func = (PNGChunkDataStructInitFunc)PNGInitData_UnknownData;
   functions.load_func = (PNGChunkDataStructLoadFunc)PNGLoadData_UnknownData;
   functions.write_func = (PNGChunkDataStructWriteFunc)PNGWriteData_UnknownData;
   functions.free_func = (PNGChunkDataStructFreeFunc)PNGFreeData_UnknownData;
   return functions;
+}
+
+/**
+ * Implements allocating function
+ */
+#define PNG_IMPLEMENT_CHUNK_DATA_ALLOCATE(chunk_type)                                         \
+  struct PNGChunkData_##chunk_type *PNGAllocateData_##chunk_type() {                          \
+    struct PNGChunkData_##chunk_type *obj = malloc(sizeof(struct PNGChunkData_##chunk_type)); \
+    if (obj)                                                                                  \
+      PNGInitData_##chunk_type(obj);                                                          \
+    return obj;                                                                               \
+  }
+
+PNG_IMPLEMENT_CHUNK_DATA_ALLOCATE(IHDR)
+PNG_IMPLEMENT_CHUNK_DATA_ALLOCATE(sRGB)
+PNG_IMPLEMENT_CHUNK_DATA_ALLOCATE(pHYs)
+PNG_IMPLEMENT_CHUNK_DATA_ALLOCATE(tEXt)
+PNG_IMPLEMENT_CHUNK_DATA_ALLOCATE(PLTE)
+PNG_IMPLEMENT_CHUNK_DATA_ALLOCATE(bKGD)
+PNG_IMPLEMENT_CHUNK_DATA_ALLOCATE(IEND)
+PNG_IMPLEMENT_CHUNK_DATA_ALLOCATE(gAMA)
+PNG_IMPLEMENT_CHUNK_DATA_ALLOCATE(IDAT)
+PNG_IMPLEMENT_CHUNK_DATA_ALLOCATE(sBIT)
+PNG_IMPLEMENT_CHUNK_DATA_ALLOCATE(UnknownData)
+
+#undef PNG_IMPLEMENT_CHUNK_DATA_ALLOCATE
+
+void PNGInitData_IHDR(struct PNGChunkData_IHDR *obj) {
+#warning TODO IMPLEMENT
+  (void)obj;
 }
 
 struct PNGChunkData_IHDR *PNGLoadData_IHDR(const uint8_t *data, int data_size) {
@@ -80,6 +116,11 @@ int PNGWriteData_IHDR(const struct PNGChunkData_IHDR *data, void *out) {
 
 void PNGFreeData_IHDR(struct PNGChunkData_IHDR *data) {
   free(data);
+}
+
+void PNGInitData_tEXt(struct PNGChunkData_tEXt *obj) {
+#warning TODO IMPLEMENT
+  (void)obj;
 }
 
 struct PNGChunkData_tEXt *PNGLoadData_tEXt(const uint8_t *data, int data_size) {
@@ -140,6 +181,11 @@ void PNGFreeData_tEXt(struct PNGChunkData_tEXt *data) {
   free(data);
 }
 
+void PNGInitData_PLTE(struct PNGChunkData_PLTE *obj) {
+#warning TODO IMPLEMENT
+  (void)obj;
+}
+
 struct PNGChunkData_PLTE *PNGLoadData_PLTE(const uint8_t *data, int data_size) {
   if (data_size % 3 != 0)
     return NULL;
@@ -179,6 +225,11 @@ void PNGFreeData_PLTE(struct PNGChunkData_PLTE *data) {
   free(data);
 }
 
+void PNGInitData_bKGD(struct PNGChunkData_bKGD *obj) {
+#warning TODO IMPLEMENT
+  (void)obj;
+}
+
 struct PNGChunkData_bKGD *PNGLoadData_bKGD(const uint8_t *data, int data_size) {
   if (data_size != 1)
     return NULL;
@@ -199,6 +250,11 @@ int PNGWriteData_bKGD(const struct PNGChunkData_bKGD *data, void *out) {
 
 void PNGFreeData_bKGD(struct PNGChunkData_bKGD *data) {
   free(data);
+}
+
+void PNGInitData_gAMA(struct PNGChunkData_gAMA *obj) {
+#warning TODO IMPLEMENT
+  (void)obj;
 }
 
 struct PNGChunkData_gAMA *PNGLoadData_gAMA(const uint8_t *data, int data_size) {
@@ -224,6 +280,11 @@ int PNGWriteData_gAMA(const struct PNGChunkData_gAMA *data, void *out) {
 
 void PNGFreeData_gAMA(struct PNGChunkData_gAMA *data) {
   free(data);
+}
+
+void PNGInitData_pHYs(struct PNGChunkData_pHYs *obj) {
+#warning TODO IMPLEMENT
+  (void)obj;
 }
 
 struct PNGChunkData_pHYs *PNGLoadData_pHYs(const uint8_t *data, int data_size) {
@@ -257,6 +318,11 @@ void PNGFreeData_pHYs(struct PNGChunkData_pHYs *data) {
   free(data);
 }
 
+void PNGInitData_sRGB(struct PNGChunkData_sRGB *obj) {
+#warning TODO IMPLEMENT
+  (void)obj;
+}
+
 struct PNGChunkData_sRGB *PNGLoadData_sRGB(const uint8_t *data, int data_size) {
   if (data_size != 1)
     return NULL;
@@ -278,6 +344,11 @@ int PNGWriteData_sRGB(const struct PNGChunkData_sRGB *data, void *out) {
 
 void PNGFreeData_sRGB(struct PNGChunkData_sRGB *data) {
   free(data);
+}
+
+void PNGInitData_IDAT(struct PNGChunkData_IDAT *obj) {
+#warning TODO IMPLEMENT
+  (void)obj;
 }
 
 struct PNGChunkData_IDAT *PNGLoadData_IDAT(const uint8_t *data, int data_size) {
@@ -307,6 +378,10 @@ void PNGFreeData_IDAT(struct PNGChunkData_IDAT *data) {
   free(data);
 }
 
+void PNGInitData_sBIT(struct PNGChunkData_sBIT *obj) {
+#warning TODO IMPLEMENT
+  (void)obj;
+}
 struct PNGChunkData_sBIT *PNGLoadData_sBIT(const uint8_t *data, int data_size) {
   if (data_size != 4)
     return NULL;
@@ -328,6 +403,11 @@ int PNGWriteData_sBIT(const struct PNGChunkData_sBIT *data, void *out) {
 
 void PNGFreeData_sBIT(struct PNGChunkData_sBIT *data) {
   free(data);
+}
+
+void PNGInitData_UnknownData(struct PNGChunkData_UnknownData *obj) {
+#warning TODO IMPLEMENT
+  (void)obj;
 }
 
 struct PNGChunkData_UnknownData *PNGLoadData_UnknownData(const uint8_t *data, int data_size) {
@@ -356,6 +436,11 @@ int PNGWriteData_UnknownData(const struct PNGChunkData_UnknownData *data, void *
 void PNGFreeData_UnknownData(struct PNGChunkData_UnknownData *data) {
   free(data->data);
   free(data);
+}
+
+void PNGInitData_IEND(struct PNGChunkData_IEND *obj) {
+#warning TODO IMPLEMENT
+  (void)obj;
 }
 
 struct PNGChunkData_IEND *PNGLoadData_IEND(const uint8_t *data, int data_size) {

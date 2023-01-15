@@ -30,6 +30,18 @@ extern const uint8_t s_png_signature[8];
  */
 extern const int32_t s_png_max_chunk_data_size_bytes;
 
+/**
+ * Type of function that allocates and inits with default values an object of chunk data structure of specific type
+ * @return Pointer to allocated and initialized object or NULL, if error occurred.
+ *   Caller is responsible for freeing it with corresponding PNGChunkDataStructFreeFunc function
+ */
+typedef void* (*PNGChunkDataStructAllocateFunc)();
+
+/**
+ *  Initialize an object of specific chunk data struct with default values
+ *  @param[in, out] obj Chunk data structure object, not NULL
+ */
+typedef void (*PNGChunkDataStructInitFunc)(void* obj);
 
 /**
  * Type of function that constructs chunk data structure of specifc type
@@ -59,11 +71,15 @@ typedef void (*PNGChunkDataStructFreeFunc)(void* /* obj */);
  * Declare Construct/Write/Free functions for chunk data structure.
  * See PNGChunkDataStructLoadFunc, PNGChunkDataStructWriteFunc, PNGChunkDataStructFreeFunc.
  * @example for PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(IHDR):
+ *   PNG_CORE_API struct PNGChunkData_IHDR* PNGAllocateData_IHDR();
+ *   PNG_CORE_API void PNGInitData_IHDR(struct PNGChunkData_IHDR* obj);
  *   PNG_CORE_API struct PNGChunkData_IHDR* PNGLoadData_IHDR(const uint8_t* data, int data_size);
  *   PNG_CORE_API int PNGWriteData_IHDR(const struct PNGChunkData_IHDR* data, void* out);
  *   PNG_CORE_API void PNGFreeData_IHDR(struct PNGChunkData_IHDR* data, void* out);
  */
 #define PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(chunk_type)                                                    \
+  PNG_CORE_API struct PNGChunkData_##chunk_type* PNGAllocateData_##chunk_type();                               \
+  PNG_CORE_API void PNGInitData_##chunk_type(struct PNGChunkData_##chunk_type* obj);                           \
   PNG_CORE_API struct PNGChunkData_##chunk_type* PNGLoadData_##chunk_type(const uint8_t* data, int data_size); \
   PNG_CORE_API int PNGWriteData_##chunk_type(const struct PNGChunkData_##chunk_type* obj, void* out);          \
   PNG_CORE_API void PNGFreeData_##chunk_type(struct PNGChunkData_##chunk_type* obj);
@@ -72,6 +88,8 @@ typedef void (*PNGChunkDataStructFreeFunc)(void* /* obj */);
  * Function set for chunk data struct
  */
 struct PNGChunkDataStructFunctions {
+  PNGChunkDataStructAllocateFunc alloc_func;
+  PNGChunkDataStructInitFunc init_func;
   PNGChunkDataStructLoadFunc load_func;
   PNGChunkDataStructWriteFunc write_func;
   PNGChunkDataStructFreeFunc free_func;

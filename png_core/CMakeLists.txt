@@ -13,7 +13,6 @@ set(SOURCES_LIST
 	src/chunk_data.c
 	src/chunk_types.c
 	src/compression.c
-	src/datastream.c
 	src/decoder.c
 	src/filtering.c
 	src/pixel_format.c

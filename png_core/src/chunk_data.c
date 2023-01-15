@@ -506,6 +506,127 @@ void PNGInitRawChunk(struct PNGRawChunk *obj) {
   obj->next = NULL;
 }
 
+struct PNGRawChunk *PNGLoadRawChunk(const uint8_t *data, int data_size) {
+  if (data_size < 12)
+    return NULL;
+
+  const uint32_t chunk_data_size = ReadNetworkAndAdvanceInt32(&data, true);
+  if (chunk_data_size > s_png_max_chunk_data_size_bytes || 12 + chunk_data_size != data_size)
+    return NULL;
+
+  struct PNGRawChunk *chunk = malloc(sizeof(struct PNGRawChunk));
+  PNGInitRawChunk(chunk);
+
+  chunk->raw_data_size_bytes = chunk_data_size;
+  ReadNetworkAndAdvanceBytesInPlace(&data, chunk->type.byte_array, sizeof(chunk->type.byte_array));
+  chunk->raw_data = ReadNetworkAndAdvanceBytes(&data, chunk->raw_data_size_bytes);
+  /* Allocation fail */
+  if (chunk->raw_data_size_bytes > 0 && !chunk->raw_data) {
+    free(chunk);
+    return NULL;
+  }
+  chunk->data_functions = PNGGetChunkDataStructFunctions(chunk->type);
+  assert(chunk->data_functions.load_func);
+  chunk->parsed_data = chunk->data_functions.load_func(chunk->raw_data, chunk->raw_data_size_bytes);
+  /* Allocation fail or definitely invalid data */
+  if (!chunk->parsed_data) {
+    free(chunk);
+    return NULL;
+  }
+  chunk->crc = ReadNetworkAndAdvanceUInt32(&data, true);
+
+  return chunk;
+}
+
+struct PNGRawChunk *PNGLoadRawChunkList(const uint8_t *data, int data_size, bool data_with_png_signature) {
+  const uint8_t *data_end = data + data_size;
+  if (data_with_png_signature)
+    data += sizeof(s_png_signature);
+
+  struct PNGRawChunk dummyHead;
+  dummyHead.next = NULL;
+  struct PNGRawChunk *last_chunk = &dummyHead;
+
+  while (data < data_end) {
+    if (data_end - data < 12)
+      return dummyHead.next;
+
+    const uint32_t chunk_length = ReadNetworkAndAdvanceInt32(&data, false);
+    if (chunk_length > s_png_max_chunk_data_size_bytes)
+      return dummyHead.next;
+
+    const uint8_t *chunk_end = data + 12 + chunk_length;
+    if (chunk_end > data_end)
+      return dummyHead.next;
+
+    last_chunk->next = PNGLoadRawChunk(data, 12 + chunk_length);
+    if (!last_chunk->next)
+      return dummyHead.next;
+
+    last_chunk = last_chunk->next;
+    data = chunk_end;
+  }
+
+  return dummyHead.next;
+}
+
+int PNGWriteRawChunk(const struct PNGRawChunk *obj, uint8_t *out) {
+  assert(obj);
+
+  if (!out) {
+    int data_size = 0;
+    if (obj->raw_data)
+      data_size = obj->raw_data_size_bytes;
+    else if (obj->parsed_data)
+      data_size = obj->data_functions.write_func(obj, NULL);
+
+    const int expected_size = sizeof(int32_t) + sizeof(uint32_t) + data_size + sizeof(uint32_t);
+    return expected_size;
+  }
+
+  WriteNetworkAndAdvanceInt32(&out, obj->raw_data_size_bytes);
+  WriteNetworkAndAdvanceBytes(&out, obj->type.byte_array, 4);
+  int data_size = obj->raw_data_size_bytes;
+  if (obj->raw_data)
+    WriteNetworkAndAdvanceBytes(&out, obj->raw_data, obj->raw_data_size_bytes);
+  else if (obj->parsed_data) {
+    data_size = obj->data_functions.write_func(obj, NULL);
+    obj->data_functions.write_func(obj, out);
+    out += data_size;
+  }
+  WriteNetworkAndAdvanceUInt32(&out, obj->crc);
+
+  return sizeof(int32_t) + sizeof(uint32_t) + data_size + sizeof(uint32_t);
+}
+
+int PNGWriteRawChunkList(const struct PNGRawChunk *obj, uint8_t *out, bool write_png_signature) {
+  if (!out) {
+    int total_size = 0;
+    if (write_png_signature)
+      total_size += sizeof(s_png_signature);
+    const struct PNGRawChunk *chunk = obj;
+    while (obj) {
+      total_size += PNGWriteRawChunk(obj, NULL);
+      obj = obj->next;
+    }
+    return total_size;
+  }
+
+  int total_size = 0;
+  if (write_png_signature) {
+    WriteNetworkAndAdvanceBytes(&out, s_png_signature, sizeof(s_png_signature));
+    total_size += sizeof(s_png_signature);
+  }
+  const struct PNGRawChunk *chunk = obj;
+  while (obj) {
+    int bytes_written = PNGWriteRawChunk(obj, out);
+    total_size += bytes_written;
+    out += bytes_written;
+    obj = obj->next;
+  }
+  return total_size;
+}
+
 void PNGFreeRawChunk(struct PNGRawChunk *obj) {
   if (!obj)
     return;
@@ -514,9 +635,13 @@ void PNGFreeRawChunk(struct PNGRawChunk *obj) {
     struct PNGRawChunk *next = obj->next;
     free(obj->raw_data);
     if (obj->parsed_data) {
-      struct PNGChunkDataStructFunctions functions = PNGGetChunkDataStructFunctions(obj->type);
-      assert(functions.free_func);
-      functions.free_func(obj->parsed_data);
+      if (obj->data_functions.free_func)
+        obj->data_functions.free_func(obj->parsed_data);
+      else {
+        /* No provided freeing function for complex object => Possible memory leak. */
+        assert(false);
+        free(obj->parsed_data);
+      }
     }
     free(obj);
     obj = next;

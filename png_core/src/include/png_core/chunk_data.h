@@ -100,7 +100,7 @@ PNG_CORE_API void PNGInitChunkDataStructFunctions(struct PNGChunkDataStructFunct
  * Get function set for chunk data struct of specific type
  * @param[in] type Chunk type
  * @return Function set for chunk data type.
- * Returns function set for UnknownData chunk data type if type noes not matches any supported chunk data type.
+ * Returns full function set for UnknownData chunk data type if type noes not matches any supported chunk data type.
  */
 struct PNGChunkDataStructFunctions PNGGetChunkDataStructFunctions(struct ChunkType type);
 
@@ -221,7 +221,7 @@ PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(IEND)
  */
 struct PNGRawChunk {
   /* raw_data size in bytes */
-  uint32_t chunk_size_bytes;
+  uint32_t raw_data_size_bytes;
 
   /* Sequence of bytes defining chunk type */
   struct ChunkType type;
@@ -230,6 +230,8 @@ struct PNGRawChunk {
   uint8_t* raw_data;
   /* Pointer to constructed corresponding data structire constructed from raw_data */
   void* parsed_data;
+  /* Set of functions to manipulate parsed_data */
+  struct PNGChunkDataStructFunctions data_functions;
 
   /* A Cyclic Redundancy Code calculated on the type and data fields */
   uint32_t crc;
@@ -252,7 +254,44 @@ struct PNGRawChunk* PNGAllocateRawChunk();
 PNG_CORE_API void PNGInitRawChunk(struct PNGRawChunk* obj);
 
 /**
- * @brief Free *whole* PNGRawChunk list
+ * @brief Load and parse a single chunk from network-ordered buffer
+ * @param[in] data Buffer
+ * @param data_size Buffer size in bytes. Should be equal to total chunk size
+ * @return Loaded and parsed (at least UnknownData) chunk or NULL, if error occurred
+ */
+PNG_CORE_API struct PNGRawChunk* PNGLoadRawChunk(const uint8_t* data, int data_size);
+
+/**
+ * @brief Load and parse chunk list from network-ordered buffer
+ * @param[in] data Buffer chunks stream.
+ * @param data_size Buffer size in bytes
+ * @return Loaded and parsed chunk or NULL, if error occurred
+ */
+PNG_CORE_API struct PNGRawChunk* PNGLoadRawChunkList(const uint8_t* data, int data_size, bool data_with_png_signature);
+
+/**
+ * @brief Write chunk into network-ordered buffer
+ * If present, writes raw_data. Tries to write parsed_data otherwise
+ * @note Call with out==NULL to get size in bytes
+ * @param[in] obj Chunk to write, not null
+ * @param[out] out Buffer
+ * @return Amount of bytes written
+ */
+PNG_CORE_API int PNGWriteRawChunk(const struct PNGRawChunk* obj, uint8_t* out);
+
+/**
+ * @brief Write chunk list into network-ordered buffer
+ * If present, writes raw_data. Tries to write parsed_data otherwise
+ * @note Call with out==NULL to get size in bytes
+ * @param[in] obj Chunk to write, not null
+ * @param[out] out Buffer
+ * @return Amount of bytes written
+ */
+PNG_CORE_API int PNGWriteRawChunkList(const struct PNGRawChunk* obj, uint8_t* out, bool write_png_signature);
+
+/**
+ * @brief Free *whole* PNGRawChunk list.
+ * Each node should provide valid freeing function for data object.
  * @param[in, out] obj List to free. Can be NULL
  */
 PNG_CORE_API void PNGFreeRawChunk(struct PNGRawChunk* obj);

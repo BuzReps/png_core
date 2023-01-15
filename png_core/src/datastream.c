@@ -30,24 +30,24 @@ struct PNGRawChunk* PNGCreateFromDatastream(void* data, int data_size) {
       break;
     new_chunk->next = NULL;
 
-    new_chunk->length = *(const uint32_t*)(current_ptr);
+    new_chunk->chunk_size_bytes = *(const uint32_t*)(current_ptr);
     current_ptr += sizeof(uint32_t);
     if (PNG_IS_LITTLE_ENDIAN)
-      FlipBytesInBuffer(&new_chunk->length, sizeof(uint32_t));
+      FlipBytesInBuffer(&new_chunk->chunk_size_bytes, sizeof(uint32_t));
 
     for (int i = 0; i < 4; ++i) {
       new_chunk->type.byte_array[i] = *current_ptr;
       ++current_ptr;
     }
 
-    new_chunk->raw_data = malloc(new_chunk->length);
+    new_chunk->raw_data = malloc(new_chunk->chunk_size_bytes);
     if (!new_chunk->raw_data) {
       break;
     }
-    memcpy(new_chunk->raw_data, current_ptr, new_chunk->length);
-    new_chunk->parsed_data = ParseChunkDataStruct(new_chunk->type, current_ptr, new_chunk->length);
+    memcpy(new_chunk->raw_data, current_ptr, new_chunk->chunk_size_bytes);
+    new_chunk->parsed_data = ParseChunkDataStruct(new_chunk->type, current_ptr, new_chunk->chunk_size_bytes);
 
-    current_ptr += new_chunk->length;
+    current_ptr += new_chunk->chunk_size_bytes;
 
     new_chunk->crc = *(const uint32_t*)current_ptr;
     current_ptr += sizeof(uint32_t);

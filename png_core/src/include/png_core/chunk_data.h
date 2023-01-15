@@ -216,26 +216,46 @@ PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(IEND)
 
 #undef PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS
 
+/**
+ * @brief Generic chunk structure
+ */
 struct PNGRawChunk {
-  /* Chunk raw data length in bytes */
-  uint32_t length;
+  /* raw_data size in bytes */
+  uint32_t chunk_size_bytes;
+
+  /* Sequence of bytes defining chunk type */
   struct ChunkType type;
+
   /* Pointer to chunk raw data */
   uint8_t* raw_data;
-  /* Pointer to chunk-specific parsed data structire */
+  /* Pointer to constructed corresponding data structire constructed from raw_data */
   void* parsed_data;
-  /*
-   * A Cyclic Redundancy Code calculated
-   * on the chunk type field and chunk data fields
-   */
+
+  /* A Cyclic Redundancy Code calculated on the type and data fields */
   uint32_t crc;
 
+  /* Next element in linked list of chunks */
   struct PNGRawChunk* next;
 };
 
+/**
+ * Allocate and init PNGRawChunk object
+ * @return Allocated object or NULL if error occurred
+ * Should be freed with `PNGFreeRawChunk()`
+ */
+struct PNGRawChunk* PNGAllocateRawChunk();
+
+/**
+ * @brief Initialize PNGRawChunk with default values
+ * @param[in, out] obj Chunk obj, not null
+ */
 PNG_CORE_API void PNGInitRawChunk(struct PNGRawChunk* obj);
 
-PNG_CORE_API void PNGFreeRawChunkList(struct PNGRawChunk* node);
+/**
+ * @brief Free *whole* PNGRawChunk list
+ * @param[in, out] obj List to free. Can be NULL
+ */
+PNG_CORE_API void PNGFreeRawChunk(struct PNGRawChunk* obj);
 
 #ifdef __cplusplus
 }  // extern "C"

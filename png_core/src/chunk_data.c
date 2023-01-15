@@ -464,27 +464,37 @@ void PNGFreeData_IEND(struct PNGChunkData_IEND *data) {
   free(data);
 }
 
+struct PNGRawChunk *PNGAllocateRawChunk() {
+  struct PNGRawChunk *obj = malloc(sizeof(struct PNGRawChunk));
+  if (!obj)
+    PNGInitRawChunk(obj);
+  return obj;
+}
+
 void PNGInitRawChunk(struct PNGRawChunk *obj) {
-  obj->length = 0;
+  assert(obj);
+
+  obj->chunk_size_bytes = 0;
   obj->type = CHUNK_INVALID;
   obj->raw_data = NULL;
   obj->parsed_data = NULL;
   obj->crc = 0;
+  obj->next = NULL;
 }
 
-void PNGFreeRawChunkList(struct PNGRawChunk *node) {
-  if (!node)
+void PNGFreeRawChunk(struct PNGRawChunk *obj) {
+  if (!obj)
     return;
 
-  while (node) {
-    struct PNGRawChunk *next = node->next;
-    free(node->raw_data);
-    if (node->parsed_data) {
-      struct PNGChunkDataStructFunctions functions = PNGGetChunkDataStructFunctions(node->type);
+  while (obj) {
+    struct PNGRawChunk *next = obj->next;
+    free(obj->raw_data);
+    if (obj->parsed_data) {
+      struct PNGChunkDataStructFunctions functions = PNGGetChunkDataStructFunctions(obj->type);
       assert(functions.free_func);
-      functions.free_func(node->parsed_data);
+      functions.free_func(obj->parsed_data);
     }
-    free(node);
-    node = next;
+    free(obj);
+    obj = next;
   }
 }

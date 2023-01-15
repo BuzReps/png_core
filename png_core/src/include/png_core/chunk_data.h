@@ -1,3 +1,13 @@
+/**
+ * @file png_core/chunk_data.h
+ *
+ * @author Vladislav Buzun
+ *
+ * @date 15 Jan 2023
+ *
+ * @brief File containing chunk data structures and helping functions
+ */
+
 #pragma once
 
 #include <stdbool.h>
@@ -10,24 +20,57 @@
 extern "C" {
 #endif
 
-/* Png datastream signature */
+/**
+ * Png datastream signature
+ */
 extern const uint8_t s_png_signature[8];
-extern const int32_t s_png_max_chunk_data_length;
 
-/* Function that constructs chunk data structure from buffer */
-typedef void* (*PNGChunkDataStructLoadFunc)(const uint8_t* /* data */, int /* data_size */);
+/**
+ * Max chunk data size in bytes.
+ */
+extern const int32_t s_png_max_chunk_data_size_bytes;
 
-/*
- * Function that writes chunk data into buffer 'out' in network-ordered format
- * @note Call with NULL 'out' to get size
+
+/**
+ * Type of function that constructs chunk data structure of specifc type
+ * @param[in] raw_data Network-ordered chunk raw data (not whole chunk), not null
+ * @param[in] size_bytes raw_data size in bytes
+ * @return Constructed data object or NULL, if error occurred.
+ *   Caller is responsible for freeing it with corresponding PNGChunkDataStructFreeFunc function
+ */
+typedef void* (*PNGChunkDataStructLoadFunc)(const uint8_t* /* raw_data */, int /* size_bytes */);
+
+/**
+ * Function that writes chunk data into network-ordered buffer
+ * @note Call with `out == NULL` to get required size in bytes
+ * @param[in] obj Chunk data structure object, not NULL
  * @param[out] out Datastream buffer. Should contain enough space to contain chunk data. Can be NULL
  * @return Amount of bytes written
  */
-typedef int (*PNGChunkDataStructWriteFunc)(const void* /* data */, uint8_t* /* out */);
+typedef uint32_t (*PNGChunkDataStructWriteFunc)(const void* /* obj */, uint8_t* /* out */);
 
-/* Function that frees chunk data structure */
-typedef void (*PNGChunkDataStructFreeFunc)(void* /* data */);
+/**
+ * Function that frees chunk data structure object
+ * @param[in] obj Chunk data structure object, nullable
+ */
+typedef void (*PNGChunkDataStructFreeFunc)(void* /* obj */);
 
+/**
+ * Declare Construct/Write/Free functions for chunk data structure.
+ * See PNGChunkDataStructLoadFunc, PNGChunkDataStructWriteFunc, PNGChunkDataStructFreeFunc.
+ * @example for PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(IHDR):
+ *   PNG_CORE_API struct PNGChunkData_IHDR* PNGLoadData_IHDR(const uint8_t* data, int data_size);
+ *   PNG_CORE_API int PNGWriteData_IHDR(const struct PNGChunkData_IHDR* data, void* out);
+ *   PNG_CORE_API void PNGFreeData_IHDR(struct PNGChunkData_IHDR* data, void* out);
+ */
+#define PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(chunk_type)                                                    \
+  PNG_CORE_API struct PNGChunkData_##chunk_type* PNGLoadData_##chunk_type(const uint8_t* data, int data_size); \
+  PNG_CORE_API int PNGWriteData_##chunk_type(const struct PNGChunkData_##chunk_type* obj, void* out);          \
+  PNG_CORE_API void PNGFreeData_##chunk_type(struct PNGChunkData_##chunk_type* obj);
+
+/**
+ * Function set for chunk data struct
+ */
 struct PNGChunkDataStructFunctions {
   PNGChunkDataStructLoadFunc load_func;
   PNGChunkDataStructWriteFunc write_func;
@@ -35,7 +78,11 @@ struct PNGChunkDataStructFunctions {
 };
 PNG_CORE_API void PNGInitChunkDataStructFunctions(struct PNGChunkDataStructFunctions* obj);
 
-/* Get functions that handles chunk data structures */
+/**
+ * Get function set for chunk data struct of specific type
+ * @param[in] type Chunk type
+ * @return Function set for chunk data type.
+ */
 struct PNGChunkDataStructFunctions PNGGetChunkDataStructFunctions(struct ChunkType type);
 
 /* IHDR */
@@ -48,22 +95,14 @@ struct PNGChunkData_IHDR {
   int8_t filter_method;
   int8_t interlace_method;
 };
-/*
- * Load IHDR chunk data from buffer 'data' into 'out'.
- * 'data' buffer is in network byte order
- */
-PNG_CORE_API struct PNGChunkData_IHDR* PNGLoadData_IHDR(const uint8_t* data, int data_size);
-PNG_CORE_API int PNGWriteData_IHDR(const struct PNGChunkData_IHDR* data, void* out);
-PNG_CORE_API void PNGFreeData_IHDR(struct PNGChunkData_IHDR* data);
+PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(IHDR)
 
 /* tEXt */
 struct PNGChunkData_tEXt {
   char* keyword;
   char* text;
 };
-PNG_CORE_API struct PNGChunkData_tEXt* PNGLoadData_tEXt(const uint8_t* data, int data_size);
-PNG_CORE_API int PNGWriteData_tEXt(const struct PNGChunkData_tEXt* data, void* out);
-PNG_CORE_API void PNGFreeData_tEXt(struct PNGChunkData_tEXt* data);
+PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(tEXt)
 
 struct PaletteDataEntry {
   uint8_t red;
@@ -76,17 +115,13 @@ struct PNGChunkData_PLTE {
   struct PaletteDataEntry* entries;
   int entries_count;
 };
-PNG_CORE_API struct PNGChunkData_PLTE* PNGLoadData_PLTE(const uint8_t* data, int data_size);
-PNG_CORE_API int PNGWriteData_PLTE(const struct PNGChunkData_PLTE* data, void* out);
-PNG_CORE_API void PNGFreeData_PLTE(struct PNGChunkData_PLTE* data);
+PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(PLTE)
 
 /* bKGD */
 struct PNGChunkData_bKGD {
   uint8_t index_in_palette;
 };
-PNG_CORE_API struct PNGChunkData_bKGD* PNGLoadData_bKGD(const uint8_t* data, int data_size);
-PNG_CORE_API int PNGWriteData_bKGD(const struct PNGChunkData_bKGD* data, void* out);
-PNG_CORE_API void PNGFreeData_bKGD(struct PNGChunkData_bKGD* data);
+PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(bKGD)
 
 /* gAMA */
 struct PNGChunkData_gAMA {
@@ -96,9 +131,7 @@ struct PNGChunkData_gAMA {
    */
   uint32_t gamma;
 };
-PNG_CORE_API struct PNGChunkData_gAMA* PNGLoadData_gAMA(const uint8_t* data, int data_size);
-PNG_CORE_API int PNGWriteData_gAMA(const struct PNGChunkData_gAMA* data, void* out);
-PNG_CORE_API void PNGFreeData_gAMA(struct PNGChunkData_gAMA* data);
+PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(gAMA)
 
 /* pHYs */
 struct PNGChunkData_pHYs {
@@ -106,9 +139,7 @@ struct PNGChunkData_pHYs {
   uint32_t y_pixels_per_unit;
   uint8_t unit;
 };
-PNG_CORE_API struct PNGChunkData_pHYs* PNGLoadData_pHYs(const uint8_t* data, int data_size);
-PNG_CORE_API int PNGWriteData_pHYs(const struct PNGChunkData_pHYs* data, void* out);
-PNG_CORE_API void PNGFreeData_pHYs(struct PNGChunkData_pHYs* data);
+PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(pHYs)
 
 enum PNGRenderingIntent {
   /*
@@ -137,42 +168,34 @@ enum PNGRenderingIntent {
 struct PNGChunkData_sRGB {
   uint8_t rendering_intent;
 };
-PNG_CORE_API struct PNGChunkData_sRGB* PNGLoadData_sRGB(const uint8_t* data, int data_size);
-PNG_CORE_API int PNGWriteData_sRGB(const struct PNGChunkData_sRGB* data, void* out);
-PNG_CORE_API void PNGFreeData_sRGB(struct PNGChunkData_sRGB* data);
+PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(sRGB)
 
 /* IDAT */
 struct PNGChunkData_IDAT {
   uint8_t* data;
   int data_size;
 };
-PNG_CORE_API struct PNGChunkData_IDAT* PNGLoadData_IDAT(const uint8_t* data, int data_size);
-PNG_CORE_API int PNGWriteData_IDAT(const struct PNGChunkData_IDAT* data, void* out);
-PNG_CORE_API void PNGFreeData_IDAT(struct PNGChunkData_IDAT* data);
+PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(IDAT)
 
 /* sBIT */
 struct PNGChunkData_sBIT {
   uint8_t bytes[4];
 };
-PNG_CORE_API struct PNGChunkData_sBIT* PNGLoadData_sBIT(const uint8_t* data, int data_size);
-PNG_CORE_API int PNGWriteData_sBIT(const struct PNGChunkData_sBIT* data, void* out);
-PNG_CORE_API void PNGFreeData_sBIT(struct PNGChunkData_sBIT* data);
+PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(sBIT)
 
 struct PNGChunkData_UnknownData {
   uint8_t* data;
   int data_size;
 };
-PNG_CORE_API struct PNGChunkData_UnknownData* PNGLoadData_UnknownData(const uint8_t* data, int data_size);
-PNG_CORE_API int PNGWriteData_UnknownData(const struct PNGChunkData_UnknownData* data, void* out);
-PNG_CORE_API void PNGFreeData_UnknownData(struct PNGChunkData_UnknownData* data);
+PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(UnknownData)
 
 /* IEND */
 struct PNGChunkData_IEND {
   uint8_t unused;
 };
-PNG_CORE_API struct PNGChunkData_IEND* PNGLoadData_IEND(const uint8_t* data, int data_size);
-PNG_CORE_API int PNGWriteData_IEND(const struct PNGChunkData_IEND* data, void* out);
-PNG_CORE_API void PNGFreeData_IEND(struct PNGChunkData_IEND* data);
+PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(IEND)
+
+#undef PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS
 
 struct PNGRawChunk {
   /* Chunk raw data length in bytes */

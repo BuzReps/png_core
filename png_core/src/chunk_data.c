@@ -7,7 +7,9 @@
 #include "tools.h"
 
 const uint8_t s_png_signature[8] = {137, 80, 78, 71, 13, 10, 26, 10};
-const int32_t s_png_max_chunk_data_length = INT32_MAX;
+
+/* 2^31 - 1 */
+const int32_t s_png_max_chunk_data_size_bytes = INT32_MAX;
 
 void PNGInitChunkDataStructFunctions(struct PNGChunkDataStructFunctions *obj) {
   obj->load_func = NULL;
@@ -16,26 +18,29 @@ void PNGInitChunkDataStructFunctions(struct PNGChunkDataStructFunctions *obj) {
 }
 
 struct PNGChunkDataStructFunctions PNGGetChunkDataStructFunctions(struct ChunkType type) {
-#define PNG_MAKE_FUNCTIONS(chunk_name)                \
-  if (type.bytes == CHUNK_##chunk_name.bytes) {       \
-    struct PNGChunkDataStructFunctions functions;     \
-    PNGInitChunkDataStructFunctions(&functions);      \
-    functions.load_func = (PNGChunkDataStructLoadFunc)PNGLoadData_##chunk_name;    \
-    functions.write_func = (PNGChunkDataStructWriteFunc)PNGWriteData_##chunk_name; \
-    functions.free_func = (PNGChunkDataStructFreeFunc)PNGFreeData_##chunk_name;    \
-    return functions;                                 \
+/**
+ * Returns function set if type matches
+ */
+#define PNG_RETURN_FUNCTION_SET(chunk_name)                                              \
+  if (type.bytes == CHUNK_##chunk_name.bytes) {                                          \
+    struct PNGChunkDataStructFunctions functions;                                        \
+    PNGInitChunkDataStructFunctions(&functions);                                         \
+    functions.load_func = (PNGChunkDataStructLoadFunc)PNGLoadData_##chunk_name;          \
+    functions.write_func = (PNGChunkDataStructWriteFunc)PNGWriteData_##chunk_name;       \
+    functions.free_func = (PNGChunkDataStructFreeFunc)PNGFreeData_##chunk_name;          \
+    return functions;                                                                    \
   }
-  PNG_MAKE_FUNCTIONS(IHDR)
-  PNG_MAKE_FUNCTIONS(sRGB)
-  PNG_MAKE_FUNCTIONS(pHYs)
-  PNG_MAKE_FUNCTIONS(tEXt)
-  PNG_MAKE_FUNCTIONS(PLTE)
-  PNG_MAKE_FUNCTIONS(bKGD)
-  PNG_MAKE_FUNCTIONS(IEND)
-  PNG_MAKE_FUNCTIONS(gAMA)
-  PNG_MAKE_FUNCTIONS(IDAT)
-  PNG_MAKE_FUNCTIONS(sBIT)
-#undef PNG_MAKE_FUNCTIONS
+  PNG_RETURN_FUNCTION_SET(IHDR)
+  PNG_RETURN_FUNCTION_SET(sRGB)
+  PNG_RETURN_FUNCTION_SET(pHYs)
+  PNG_RETURN_FUNCTION_SET(tEXt)
+  PNG_RETURN_FUNCTION_SET(PLTE)
+  PNG_RETURN_FUNCTION_SET(bKGD)
+  PNG_RETURN_FUNCTION_SET(IEND)
+  PNG_RETURN_FUNCTION_SET(gAMA)
+  PNG_RETURN_FUNCTION_SET(IDAT)
+  PNG_RETURN_FUNCTION_SET(sBIT)
+#undef PNG_RETURN_FUNCTION_SET
 
   struct PNGChunkDataStructFunctions functions;
   PNGInitChunkDataStructFunctions(&functions);

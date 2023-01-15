@@ -82,8 +82,15 @@ PNG_IMPLEMENT_CHUNK_DATA_ALLOCATE(UnknownData)
 #undef PNG_IMPLEMENT_CHUNK_DATA_ALLOCATE
 
 void PNGInitData_IHDR(struct PNGChunkData_IHDR *obj) {
-#warning TODO IMPLEMENT
-  (void)obj;
+  assert(obj);
+
+  obj->width = 0;
+  obj->height = 0;
+  obj->bit_depth = 0;
+  obj->color_type = 0;
+  obj->compression_method = 0;
+  obj->filter_method = 0;
+  obj->interlace_method = 0;
 }
 
 struct PNGChunkData_IHDR *PNGLoadData_IHDR(const uint8_t *data, int data_size) {
@@ -119,8 +126,10 @@ void PNGFreeData_IHDR(struct PNGChunkData_IHDR *data) {
 }
 
 void PNGInitData_tEXt(struct PNGChunkData_tEXt *obj) {
-#warning TODO IMPLEMENT
-  (void)obj;
+  assert(obj);
+
+  obj->keyword = NULL;
+  obj->text = NULL;
 }
 
 struct PNGChunkData_tEXt *PNGLoadData_tEXt(const uint8_t *data, int data_size) {
@@ -182,8 +191,10 @@ void PNGFreeData_tEXt(struct PNGChunkData_tEXt *data) {
 }
 
 void PNGInitData_PLTE(struct PNGChunkData_PLTE *obj) {
-#warning TODO IMPLEMENT
-  (void)obj;
+  assert(obj);
+
+  obj->entries = NULL;
+  obj->entries_count = 0;
 }
 
 struct PNGChunkData_PLTE *PNGLoadData_PLTE(const uint8_t *data, int data_size) {
@@ -226,8 +237,9 @@ void PNGFreeData_PLTE(struct PNGChunkData_PLTE *data) {
 }
 
 void PNGInitData_bKGD(struct PNGChunkData_bKGD *obj) {
-#warning TODO IMPLEMENT
-  (void)obj;
+  assert(obj);
+
+  obj->index_in_palette = 0;
 }
 
 struct PNGChunkData_bKGD *PNGLoadData_bKGD(const uint8_t *data, int data_size) {
@@ -253,8 +265,9 @@ void PNGFreeData_bKGD(struct PNGChunkData_bKGD *data) {
 }
 
 void PNGInitData_gAMA(struct PNGChunkData_gAMA *obj) {
-#warning TODO IMPLEMENT
-  (void)obj;
+  assert(obj);
+
+  obj->gamma = 0;
 }
 
 struct PNGChunkData_gAMA *PNGLoadData_gAMA(const uint8_t *data, int data_size) {
@@ -283,8 +296,11 @@ void PNGFreeData_gAMA(struct PNGChunkData_gAMA *data) {
 }
 
 void PNGInitData_pHYs(struct PNGChunkData_pHYs *obj) {
-#warning TODO IMPLEMENT
-  (void)obj;
+  assert(obj);
+
+  obj->x_pixels_per_unit = 0;
+  obj->y_pixels_per_unit = 0;
+  obj->unit = 0;
 }
 
 struct PNGChunkData_pHYs *PNGLoadData_pHYs(const uint8_t *data, int data_size) {
@@ -319,8 +335,9 @@ void PNGFreeData_pHYs(struct PNGChunkData_pHYs *data) {
 }
 
 void PNGInitData_sRGB(struct PNGChunkData_sRGB *obj) {
-#warning TODO IMPLEMENT
-  (void)obj;
+  assert(obj);
+
+  obj->rendering_intent = 0;
 }
 
 struct PNGChunkData_sRGB *PNGLoadData_sRGB(const uint8_t *data, int data_size) {
@@ -347,8 +364,10 @@ void PNGFreeData_sRGB(struct PNGChunkData_sRGB *data) {
 }
 
 void PNGInitData_IDAT(struct PNGChunkData_IDAT *obj) {
-#warning TODO IMPLEMENT
-  (void)obj;
+  assert(obj);
+
+  obj->data = NULL;
+  obj->data_size = 0;
 }
 
 struct PNGChunkData_IDAT *PNGLoadData_IDAT(const uint8_t *data, int data_size) {
@@ -379,8 +398,9 @@ void PNGFreeData_IDAT(struct PNGChunkData_IDAT *data) {
 }
 
 void PNGInitData_sBIT(struct PNGChunkData_sBIT *obj) {
-#warning TODO IMPLEMENT
-  (void)obj;
+  assert(obj);
+
+  memset(obj->bytes, 0, sizeof(obj->bytes) / sizeof(uint8_t));
 }
 struct PNGChunkData_sBIT *PNGLoadData_sBIT(const uint8_t *data, int data_size) {
   if (data_size != 4)
@@ -406,8 +426,10 @@ void PNGFreeData_sBIT(struct PNGChunkData_sBIT *data) {
 }
 
 void PNGInitData_UnknownData(struct PNGChunkData_UnknownData *obj) {
-#warning TODO IMPLEMENT
-  (void)obj;
+  assert(obj);
+
+  obj->data = NULL;
+  obj->data_size = 0;
 }
 
 struct PNGChunkData_UnknownData *PNGLoadData_UnknownData(const uint8_t *data, int data_size) {
@@ -439,8 +461,9 @@ void PNGFreeData_UnknownData(struct PNGChunkData_UnknownData *data) {
 }
 
 void PNGInitData_IEND(struct PNGChunkData_IEND *obj) {
-#warning TODO IMPLEMENT
-  (void)obj;
+  assert(obj);
+
+  obj->unused = 0;
 }
 
 struct PNGChunkData_IEND *PNGLoadData_IEND(const uint8_t *data, int data_size) {
@@ -474,10 +497,11 @@ struct PNGRawChunk *PNGAllocateRawChunk() {
 void PNGInitRawChunk(struct PNGRawChunk *obj) {
   assert(obj);
 
-  obj->chunk_size_bytes = 0;
+  obj->raw_data_size_bytes = 0;
   obj->type = CHUNK_INVALID;
   obj->raw_data = NULL;
   obj->parsed_data = NULL;
+  PNGInitChunkDataStructFunctions(&obj->data_functions);
   obj->crc = 0;
   obj->next = NULL;
 }

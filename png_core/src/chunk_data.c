@@ -115,14 +115,40 @@ struct PNGChunkData_IHDR *PNGLoadData_IHDR(const uint8_t *data, int data_size) {
   return out;
 }
 
-int PNGWriteData_IHDR(const struct PNGChunkData_IHDR *data, void *out) {
-  // TODO IMPLEMENT
-  assert(false && "Not implemented");
-  return 0;
+int PNGWriteData_IHDR(const struct PNGChunkData_IHDR *data, uint8_t *out) {
+  assert(data);
+
+  if (out) {
+    WriteNetworkAndAdvanceInt32(&out, data->width);
+    WriteNetworkAndAdvanceInt32(&out, data->height);
+    WriteNetworkAndAdvanceByte(&out, data->bit_depth);
+    WriteNetworkAndAdvanceByte(&out, data->color_type);
+    WriteNetworkAndAdvanceByte(&out, data->compression_method);
+    WriteNetworkAndAdvanceByte(&out, data->filter_method);
+    WriteNetworkAndAdvanceByte(&out, data->interlace_method);
+  }
+  return 13;
 }
 
 void PNGFreeData_IHDR(struct PNGChunkData_IHDR *data) {
   free(data);
+}
+
+bool PNGEqualData_IHDR(const struct PNGChunkData_IHDR *obj1, const struct PNGChunkData_IHDR *obj2) {
+  if (!obj1 && !obj2)
+    return true;
+  if (!obj1 || !obj2)
+    return false;
+
+  // clang-format off
+  return obj1->width == obj2->width  &&
+    obj1->height == obj2->height  &&
+    obj1->bit_depth == obj2->bit_depth  &&
+    obj1->color_type == obj2->color_type  &&
+    obj1->compression_method == obj2->compression_method  &&
+    obj1->filter_method == obj2->filter_method  &&
+    obj1->interlace_method == obj2->interlace_method;
+  // clang-format on
 }
 
 void PNGInitData_tEXt(struct PNGChunkData_tEXt *obj) {
@@ -178,7 +204,7 @@ struct PNGChunkData_tEXt *PNGLoadData_tEXt(const uint8_t *data, int data_size) {
   return out;
 }
 
-int PNGWriteData_tEXt(const struct PNGChunkData_tEXt *data, void *out) {
+int PNGWriteData_tEXt(const struct PNGChunkData_tEXt *data, uint8_t *out) {
   // TODO IMPLEMENT
   assert(false && "Not implemented");
   return 0;
@@ -188,6 +214,31 @@ void PNGFreeData_tEXt(struct PNGChunkData_tEXt *data) {
   free(data->keyword);
   free(data->text);
   free(data);
+}
+
+bool PNGEqualData_tEXt(const struct PNGChunkData_tEXt *obj1, const struct PNGChunkData_tEXt *obj2) {
+  if (!obj1 && !obj2)
+    return true;
+  if (!obj1 || !obj2)
+    return false;
+
+  const bool has_keywords = obj1->keyword && obj2->keyword;
+  const bool has_texts = obj1->text && obj2->text;
+  if (has_keywords)
+    if (0 != strcmp(obj1->keyword, obj2->keyword))
+      return false;
+  if (has_texts)
+    if (0 != strcmp(obj1->text, obj2->text))
+      return false;
+  return true;
+}
+
+bool PNGEqualPaletteDataEntry(const struct PaletteDataEntry obj1, const struct PaletteDataEntry obj2) {
+  // clang-format off
+  return obj1.red == obj2.red &&
+    obj1.green == obj2.green &&
+    obj1.blue == obj2.blue;
+  // clang-format on
 }
 
 void PNGInitData_PLTE(struct PNGChunkData_PLTE *obj) {
@@ -225,7 +276,7 @@ struct PNGChunkData_PLTE *PNGLoadData_PLTE(const uint8_t *data, int data_size) {
   return out;
 }
 
-int PNGWriteData_PLTE(const struct PNGChunkData_PLTE *data, void *out) {
+int PNGWriteData_PLTE(const struct PNGChunkData_PLTE *data, uint8_t *out) {
   // TODO IMPLEMENT
   assert(false && "Not implemented");
   return 0;
@@ -234,6 +285,21 @@ int PNGWriteData_PLTE(const struct PNGChunkData_PLTE *data, void *out) {
 void PNGFreeData_PLTE(struct PNGChunkData_PLTE *data) {
   free(data->entries);
   free(data);
+}
+
+bool PNGEqualData_PLTE(const struct PNGChunkData_PLTE *obj1, const struct PNGChunkData_PLTE *obj2) {
+  if (!obj1 && !obj2)
+    return true;
+  if (!obj1 || !obj2)
+    return false;
+
+  if (obj1->entries_count != obj2->entries_count)
+    return false;
+  for (int i = 0; i < obj1->entries_count; ++i)
+    if (!PNGEqualPaletteDataEntry(obj1->entries[i], obj2->entries[i]))
+      return false;
+
+  return true;
 }
 
 void PNGInitData_bKGD(struct PNGChunkData_bKGD *obj) {
@@ -254,7 +320,7 @@ struct PNGChunkData_bKGD *PNGLoadData_bKGD(const uint8_t *data, int data_size) {
   return out;
 }
 
-int PNGWriteData_bKGD(const struct PNGChunkData_bKGD *data, void *out) {
+int PNGWriteData_bKGD(const struct PNGChunkData_bKGD *data, uint8_t *out) {
   // TODO IMPLEMENT
   assert(false && "Not implemented");
   return 0;
@@ -262,6 +328,15 @@ int PNGWriteData_bKGD(const struct PNGChunkData_bKGD *data, void *out) {
 
 void PNGFreeData_bKGD(struct PNGChunkData_bKGD *data) {
   free(data);
+}
+
+bool PNGEqualData_bKGD(const struct PNGChunkData_bKGD *obj1, const struct PNGChunkData_bKGD *obj2) {
+  if (!obj1 && !obj2)
+    return true;
+  if (!obj1 || !obj2)
+    return false;
+
+  return obj1->index_in_palette == obj2->index_in_palette;
 }
 
 void PNGInitData_gAMA(struct PNGChunkData_gAMA *obj) {
@@ -285,7 +360,7 @@ struct PNGChunkData_gAMA *PNGLoadData_gAMA(const uint8_t *data, int data_size) {
   return out;
 }
 
-int PNGWriteData_gAMA(const struct PNGChunkData_gAMA *data, void *out) {
+int PNGWriteData_gAMA(const struct PNGChunkData_gAMA *data, uint8_t *out) {
   // TODO IMPLEMENT
   assert(false && "Not implemented");
   return 0;
@@ -293,6 +368,15 @@ int PNGWriteData_gAMA(const struct PNGChunkData_gAMA *data, void *out) {
 
 void PNGFreeData_gAMA(struct PNGChunkData_gAMA *data) {
   free(data);
+}
+
+bool PNGEqualData_gAMA(const struct PNGChunkData_gAMA *obj1, const struct PNGChunkData_gAMA *obj2) {
+  if (!obj1 && !obj2)
+    return true;
+  if (!obj1 || !obj2)
+    return false;
+
+  return obj1->gamma == obj2->gamma;
 }
 
 void PNGInitData_pHYs(struct PNGChunkData_pHYs *obj) {
@@ -324,7 +408,7 @@ struct PNGChunkData_pHYs *PNGLoadData_pHYs(const uint8_t *data, int data_size) {
   return out;
 }
 
-int PNGWriteData_pHYs(const struct PNGChunkData_pHYs *data, void *out) {
+int PNGWriteData_pHYs(const struct PNGChunkData_pHYs *data, uint8_t *out) {
   // TODO IMPLEMENT
   assert(false && "Not implemented");
   return 0;
@@ -332,6 +416,19 @@ int PNGWriteData_pHYs(const struct PNGChunkData_pHYs *data, void *out) {
 
 void PNGFreeData_pHYs(struct PNGChunkData_pHYs *data) {
   free(data);
+}
+
+bool PNGEqualData_pHYs(const struct PNGChunkData_pHYs *obj1, const struct PNGChunkData_pHYs *obj2) {
+  if (!obj1 && !obj2)
+    return true;
+  if (!obj1 || !obj2)
+    return false;
+
+  // clang-format off
+  return obj1->x_pixels_per_unit == obj2->x_pixels_per_unit &&
+    obj1->y_pixels_per_unit == obj2->y_pixels_per_unit &&
+    obj1->unit == obj2->unit;
+  // clang-format on
 }
 
 void PNGInitData_sRGB(struct PNGChunkData_sRGB *obj) {
@@ -353,7 +450,7 @@ struct PNGChunkData_sRGB *PNGLoadData_sRGB(const uint8_t *data, int data_size) {
   return out;
 }
 
-int PNGWriteData_sRGB(const struct PNGChunkData_sRGB *data, void *out) {
+int PNGWriteData_sRGB(const struct PNGChunkData_sRGB *data, uint8_t *out) {
   // TODO IMPLEMENT
   assert(false && "Not implemented");
   return 0;
@@ -361,6 +458,15 @@ int PNGWriteData_sRGB(const struct PNGChunkData_sRGB *data, void *out) {
 
 void PNGFreeData_sRGB(struct PNGChunkData_sRGB *data) {
   free(data);
+}
+
+bool PNGEqualData_sRGB(const struct PNGChunkData_sRGB *obj1, const struct PNGChunkData_sRGB *obj2) {
+  if (!obj1 && !obj2)
+    return true;
+  if (!obj1 || !obj2)
+    return false;
+
+  return obj1->rendering_intent == obj2->rendering_intent;
 }
 
 void PNGInitData_IDAT(struct PNGChunkData_IDAT *obj) {
@@ -386,7 +492,7 @@ struct PNGChunkData_IDAT *PNGLoadData_IDAT(const uint8_t *data, int data_size) {
   return out;
 }
 
-int PNGWriteData_IDAT(const struct PNGChunkData_IDAT *data, void *out) {
+int PNGWriteData_IDAT(const struct PNGChunkData_IDAT *data, uint8_t *out) {
   // TODO IMPLEMENT
   assert(false && "Not implemented");
   return 0;
@@ -395,6 +501,21 @@ int PNGWriteData_IDAT(const struct PNGChunkData_IDAT *data, void *out) {
 void PNGFreeData_IDAT(struct PNGChunkData_IDAT *data) {
   free(data->data);
   free(data);
+}
+
+bool PNGEqualData_IDAT(const struct PNGChunkData_IDAT *obj1, const struct PNGChunkData_IDAT *obj2) {
+  if (!obj1 && !obj2)
+    return true;
+  if (!obj1 || !obj2)
+    return false;
+
+  if (obj1->data_size != obj2->data_size)
+    return false;
+  for (int i = 0; i < obj1->data_size; ++i)
+    if (obj1->data[i] != obj2->data[i])
+      return false;
+
+  return true;
 }
 
 void PNGInitData_sBIT(struct PNGChunkData_sBIT *obj) {
@@ -415,7 +536,7 @@ struct PNGChunkData_sBIT *PNGLoadData_sBIT(const uint8_t *data, int data_size) {
   return out;
 }
 
-int PNGWriteData_sBIT(const struct PNGChunkData_sBIT *data, void *out) {
+int PNGWriteData_sBIT(const struct PNGChunkData_sBIT *data, uint8_t *out) {
   // TODO IMPLEMENT
   assert(false && "Not implemented");
   return 0;
@@ -423,6 +544,19 @@ int PNGWriteData_sBIT(const struct PNGChunkData_sBIT *data, void *out) {
 
 void PNGFreeData_sBIT(struct PNGChunkData_sBIT *data) {
   free(data);
+}
+
+bool PNGEqualData_sBIT(const struct PNGChunkData_sBIT *obj1, const struct PNGChunkData_sBIT *obj2) {
+  if (!obj1 && !obj2)
+    return true;
+  if (!obj1 || !obj2)
+    return false;
+
+  for (int i = 0; i < 4; ++i)
+    if (obj1->bytes[i] != obj2->bytes[i])
+      return false;
+
+  return true;
 }
 
 void PNGInitData_UnknownData(struct PNGChunkData_UnknownData *obj) {
@@ -449,7 +583,7 @@ struct PNGChunkData_UnknownData *PNGLoadData_UnknownData(const uint8_t *data, in
   return out;
 }
 
-int PNGWriteData_UnknownData(const struct PNGChunkData_UnknownData *data, void *out) {
+int PNGWriteData_UnknownData(const struct PNGChunkData_UnknownData *data, uint8_t *out) {
   // TODO IMPLEMENT
   assert(false && "Not implemented");
   return 0;
@@ -458,6 +592,22 @@ int PNGWriteData_UnknownData(const struct PNGChunkData_UnknownData *data, void *
 void PNGFreeData_UnknownData(struct PNGChunkData_UnknownData *data) {
   free(data->data);
   free(data);
+}
+
+bool PNGEqualData_UnknownData(const struct PNGChunkData_UnknownData *obj1,
+                              const struct PNGChunkData_UnknownData *obj2) {
+  if (!obj1 && !obj2)
+    return true;
+  if (!obj1 || !obj2)
+    return false;
+
+  if (obj1->data_size != obj2->data_size)
+    return false;
+  for (int i = 0; i < obj1->data_size; ++i)
+    if (obj1->data[i] != obj2->data[i])
+      return false;
+
+  return true;
 }
 
 void PNGInitData_IEND(struct PNGChunkData_IEND *obj) {
@@ -477,7 +627,7 @@ struct PNGChunkData_IEND *PNGLoadData_IEND(const uint8_t *data, int data_size) {
   return out;
 }
 
-int PNGWriteData_IEND(const struct PNGChunkData_IEND *data, void *out) {
+int PNGWriteData_IEND(const struct PNGChunkData_IEND *data, uint8_t *out) {
   // TODO IMPLEMENT
   assert(false && "Not implemented");
   return 0;
@@ -485,6 +635,15 @@ int PNGWriteData_IEND(const struct PNGChunkData_IEND *data, void *out) {
 
 void PNGFreeData_IEND(struct PNGChunkData_IEND *data) {
   free(data);
+}
+
+bool PNGEqualData_IEND(const struct PNGChunkData_IEND *obj1, const struct PNGChunkData_IEND *obj2) {
+  if (!obj1 && !obj2)
+    return true;
+  if (!obj1 || !obj2)
+    return false;
+
+  return true;
 }
 
 struct PNGRawChunk *PNGAllocateRawChunk() {

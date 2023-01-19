@@ -27,6 +27,7 @@ extern const uint8_t s_png_signature[8];
 
 /**
  * Max chunk data size in bytes.
+ * TODO: make it and all sizes variables uint32_t?
  */
 extern const int32_t s_png_max_chunk_data_size_bytes;
 
@@ -81,8 +82,10 @@ typedef void (*PNGChunkDataStructFreeFunc)(void* /* obj */);
   PNG_CORE_API struct PNGChunkData_##chunk_type* PNGAllocateData_##chunk_type();                               \
   PNG_CORE_API void PNGInitData_##chunk_type(struct PNGChunkData_##chunk_type* obj);                           \
   PNG_CORE_API struct PNGChunkData_##chunk_type* PNGLoadData_##chunk_type(const uint8_t* data, int data_size); \
-  PNG_CORE_API int PNGWriteData_##chunk_type(const struct PNGChunkData_##chunk_type* obj, void* out);          \
-  PNG_CORE_API void PNGFreeData_##chunk_type(struct PNGChunkData_##chunk_type* obj);
+  PNG_CORE_API int PNGWriteData_##chunk_type(const struct PNGChunkData_##chunk_type* obj, uint8_t* out);       \
+  PNG_CORE_API void PNGFreeData_##chunk_type(struct PNGChunkData_##chunk_type* obj);                           \
+  PNG_CORE_API bool PNGEqualData_##chunk_type(const struct PNGChunkData_##chunk_type* obj1,                    \
+                                              const struct PNGChunkData_##chunk_type* obj2);
 
 /**
  * Function set for chunk data struct
@@ -128,6 +131,7 @@ struct PaletteDataEntry {
   uint8_t green;
   uint8_t blue;
 };
+bool PNGEqualPaletteDataEntry(const struct PaletteDataEntry obj1, const struct PaletteDataEntry obj2);
 
 /* PLTE */
 struct PNGChunkData_PLTE {

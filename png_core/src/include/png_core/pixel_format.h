@@ -26,7 +26,7 @@ PNG_CORE_API int PNGGetChannelCount(enum PNGImageType image_type);
 /*
  * Get list of allowed bit depths
  * @param[out] out_depths Buffer to write allowed bit depths into. Can be NULL
- * @return Amount of allowed bit depths
+ * @return Amount of allowed bit depths in ascending order
  */
 PNG_CORE_API int PNGGetAllowedBitDepths(enum PNGImageType image_type, uint8_t* out_depths);
 

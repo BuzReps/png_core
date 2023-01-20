@@ -22,6 +22,10 @@ typedef uint8_t* (*PNGDataDecompressionFunction)(const uint8_t* compressed, int 
 
 PNG_CORE_API PNGDataDecompressionFunction PNGGetDataDecompressionFunction(uint8_t compression_method);
 
+// TODO ADD COMPRESSION FUNCTIONS?
+
+PNG_CORE_API void PNGFreeCompressionData(uint8_t* data);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

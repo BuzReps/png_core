@@ -1,9 +1,10 @@
 #include "png_core/compression.h"
 
+#include <stdlib.h>
 #include <zlib.h>
 
-#include <stdlib.h>
-
+// TODO: using data streams: Example: https://github.com/python/cpython/blob/main/Modules/zlibmodule.c#L422
+// and remove decompressed_size argument;
 uint8_t* PNGDataDecompress0(const uint8_t* compressed, int compressed_size, int decompressed_size) {
   uint8_t* decompressed = malloc(decompressed_size);
   uLongf out_size = decompressed_size;
@@ -28,3 +29,6 @@ uint8_t* PNGDataDecompress(uint8_t method, const uint8_t* compressed, int compre
   return NULL;
 }
 
+void PNGFreeCompressionData(uint8_t* data) {
+  free(data);
+}

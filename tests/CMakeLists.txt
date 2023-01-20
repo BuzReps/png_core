@@ -23,4 +23,5 @@ endfunction()
 
 CreateTestSuiteExecutable(chunk_data_test_suite png_core/chunk_data.cpp)
 CreateTestSuiteExecutable(chunk_types_test_suite png_core/chunk_types.cpp)
+CreateTestSuiteExecutable(compression_test_suite png_core/compression.cpp)
 

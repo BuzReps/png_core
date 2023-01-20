@@ -83,6 +83,8 @@ bool IsValidChunkType(struct ChunkType type) {
       continue;
     return false;
   }
+  // In this librarys supported standard, all chunk names shall have uppercase third letters
+  if (IsChunkTypeReservedBitSet(type))
+    return false;
   return true;
 }
-

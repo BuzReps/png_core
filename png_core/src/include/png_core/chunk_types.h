@@ -42,26 +42,26 @@ PNG_CORE_API bool IsValidChunkType(struct ChunkType type);
 /*
  * If bit is set, chunk is ancillary. Critical otherwise
  */
-inline bool IsChunkTypeAncillary(struct ChunkType type) {
-  return type.byte1 | (1 << 5);
+static inline bool IsChunkTypeAncillary(struct ChunkType type) {
+  return type.byte1 & (1 << 5);
 }
 
 /*
  * If bit is set, chunk is private. Public otherwise
  */
-inline bool IsChunkTypePrivate(struct ChunkType type) {
-  return type.byte2 | (1 << 5);
+static inline bool IsChunkTypePrivate(struct ChunkType type) {
+  return type.byte2 & (1 << 5);
 }
 
 /*
  * Reserved bit should be always unset in this PNG version
  */
-inline bool IsChunkTypeReservedBitSet(struct ChunkType type) {
-  return type.byte3 | (1 << 5);
+static inline bool IsChunkTypeReservedBitSet(struct ChunkType type) {
+  return type.byte3 & (1 << 5);
 }
 
-inline bool IsChunkTypeSafeToCopy(struct ChunkType type) {
-  return type.byte4 | (1 << 5);
+static inline bool IsChunkTypeSafeToCopy(struct ChunkType type) {
+  return type.byte4 & (1 << 5);
 }
 
 #ifdef __cplusplus

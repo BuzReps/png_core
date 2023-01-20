@@ -8,6 +8,10 @@ protected:
   static inline std::vector<PNGDataDecompressionFunction> decompression_functions_ = {PNGDataDecompress0};
 };
 
+TEST_F(CompressionTestSuite, TestCompressionMethodEnum) {
+  EXPECT_EQ(PNG_COMPRESSION_METHOD_0, 0);
+}
+
 TEST_F(CompressionTestSuite, TestCompressionMethodsGetters) {
   EXPECT_EQ(PNGDataDecompress0, PNGGetDataDecompressionFunction(PNGCompressionMethod::PNG_COMPRESSION_METHOD_0));
 }

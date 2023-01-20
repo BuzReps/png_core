@@ -1,7 +1,6 @@
-# BuzReps/png_explorer
+# BuzReps/png_core
 
-`png_core` - A C11 library for [PNG](https://www.w3.org/TR/png-3/) images manipulation  
-`png_explorer` - A small PNG image editor  
+`png_core` - A C11 library for reading, editing and writing [PNG](https://www.w3.org/TR/png-3/) images  
 
 ## Project status
 
@@ -12,7 +11,7 @@ Nothing to see here. Work In Progress. Come back later.
 * Running tasks: [Make](Makefile)*  
 * Build tool: [CMake](https://cmake.org)*  
 * Dependency manager: [vcpkg](https://vcpkg.io)  
-* `png_core`'s dependency: PNG's compressing algorithm [zlib](https://www.zlib.net)  
+  * Dependency: `DEFLATE` compressing algorithm implementation: [zlib](https://www.zlib.net)  
 * Testing framework: [GoogleTest](https://github.com/google/googletest)  
 * Documentation generation: [Doxygen](https://www.doxygen.nl)**  
   * Also [GraphWiz](https://graphviz.org/) for graphs generation**  
@@ -38,4 +37,3 @@ Visual studio should do the job
   * Open `out/docs/png_core/html/index.html` in browser  
 * Run `make run_tests` to to run tests  
 * Run `make clean` to remove all generated files and artifacts  
-

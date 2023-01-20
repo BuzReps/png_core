@@ -126,6 +126,7 @@ struct PNGChunkData_tEXt {
 };
 PNG_DECLARE_CHUNK_DATA_STRUCT_FUNCTIONS(tEXt)
 
+// TODO rename with PNG prefix
 struct PaletteDataEntry {
   uint8_t red;
   uint8_t green;

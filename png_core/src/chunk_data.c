@@ -141,12 +141,12 @@ bool PNGEqualData_IHDR(const struct PNGChunkData_IHDR *obj1, const struct PNGChu
     return false;
 
   // clang-format off
-  return obj1->width == obj2->width  &&
-    obj1->height == obj2->height  &&
-    obj1->bit_depth == obj2->bit_depth  &&
-    obj1->color_type == obj2->color_type  &&
-    obj1->compression_method == obj2->compression_method  &&
-    obj1->filter_method == obj2->filter_method  &&
+  return obj1->width == obj2->width &&
+    obj1->height == obj2->height &&
+    obj1->bit_depth == obj2->bit_depth &&
+    obj1->color_type == obj2->color_type &&
+    obj1->compression_method == obj2->compression_method &&
+    obj1->filter_method == obj2->filter_method &&
     obj1->interlace_method == obj2->interlace_method;
   // clang-format on
 }
@@ -205,9 +205,18 @@ struct PNGChunkData_tEXt *PNGLoadData_tEXt(const uint8_t *data, int data_size) {
 }
 
 int PNGWriteData_tEXt(const struct PNGChunkData_tEXt *data, uint8_t *out) {
-  // TODO IMPLEMENT
-  assert(false && "Not implemented");
-  return 0;
+  assert(data);
+
+  const int keyword_length = strlen(data->keyword);
+  const int text_length = strlen(data->text);
+  const int total_size = keyword_length + 1 + text_length;
+
+  if (out) {
+    memcpy(out, data->keyword, keyword_length);
+    out[keyword_length] = '\0';
+    memcpy(out + keyword_length + 1, data->text, text_length);
+  }
+  return total_size;
 }
 
 void PNGFreeData_tEXt(struct PNGChunkData_tEXt *data) {
@@ -277,9 +286,16 @@ struct PNGChunkData_PLTE *PNGLoadData_PLTE(const uint8_t *data, int data_size) {
 }
 
 int PNGWriteData_PLTE(const struct PNGChunkData_PLTE *data, uint8_t *out) {
-  // TODO IMPLEMENT
-  assert(false && "Not implemented");
-  return 0;
+  assert(data);
+
+  if (out) {
+    for (int i = 0; i < data->entries_count; ++i) {
+      WriteNetworkAndAdvanceByte(&out, data->entries[i].red);
+      WriteNetworkAndAdvanceByte(&out, data->entries[i].green);
+      WriteNetworkAndAdvanceByte(&out, data->entries[i].blue);
+    }
+  }
+  return 3 * data->entries_count;
 }
 
 void PNGFreeData_PLTE(struct PNGChunkData_PLTE *data) {
@@ -321,9 +337,11 @@ struct PNGChunkData_bKGD *PNGLoadData_bKGD(const uint8_t *data, int data_size) {
 }
 
 int PNGWriteData_bKGD(const struct PNGChunkData_bKGD *data, uint8_t *out) {
-  // TODO IMPLEMENT
-  assert(false && "Not implemented");
-  return 0;
+  assert(data);
+
+  if (out)
+    WriteNetworkAndAdvanceByte(&out, data->index_in_palette);
+  return 1;
 }
 
 void PNGFreeData_bKGD(struct PNGChunkData_bKGD *data) {
@@ -361,9 +379,11 @@ struct PNGChunkData_gAMA *PNGLoadData_gAMA(const uint8_t *data, int data_size) {
 }
 
 int PNGWriteData_gAMA(const struct PNGChunkData_gAMA *data, uint8_t *out) {
-  // TODO IMPLEMENT
-  assert(false && "Not implemented");
-  return 0;
+  assert(data);
+
+  if (out)
+    WriteNetworkAndAdvanceUInt32(&out, data->gamma);
+  return 4;
 }
 
 void PNGFreeData_gAMA(struct PNGChunkData_gAMA *data) {
@@ -409,9 +429,14 @@ struct PNGChunkData_pHYs *PNGLoadData_pHYs(const uint8_t *data, int data_size) {
 }
 
 int PNGWriteData_pHYs(const struct PNGChunkData_pHYs *data, uint8_t *out) {
-  // TODO IMPLEMENT
-  assert(false && "Not implemented");
-  return 0;
+  assert(data);
+
+  if (out) {
+    WriteNetworkAndAdvanceUInt32(&out, data->x_pixels_per_unit);
+    WriteNetworkAndAdvanceUInt32(&out, data->y_pixels_per_unit);
+    WriteNetworkAndAdvanceByte(&out, data->unit);
+  }
+  return 9;
 }
 
 void PNGFreeData_pHYs(struct PNGChunkData_pHYs *data) {
@@ -451,9 +476,11 @@ struct PNGChunkData_sRGB *PNGLoadData_sRGB(const uint8_t *data, int data_size) {
 }
 
 int PNGWriteData_sRGB(const struct PNGChunkData_sRGB *data, uint8_t *out) {
-  // TODO IMPLEMENT
-  assert(false && "Not implemented");
-  return 0;
+  assert(data);
+
+  if (out)
+    WriteNetworkAndAdvanceByte(&out, data->rendering_intent);
+  return 1;
 }
 
 void PNGFreeData_sRGB(struct PNGChunkData_sRGB *data) {
@@ -493,9 +520,11 @@ struct PNGChunkData_IDAT *PNGLoadData_IDAT(const uint8_t *data, int data_size) {
 }
 
 int PNGWriteData_IDAT(const struct PNGChunkData_IDAT *data, uint8_t *out) {
-  // TODO IMPLEMENT
-  assert(false && "Not implemented");
-  return 0;
+  assert(data);
+
+  if (out)
+    WriteNetworkAndAdvanceBytes(&out, data->data, data->data_size);
+  return data->data_size;
 }
 
 void PNGFreeData_IDAT(struct PNGChunkData_IDAT *data) {
@@ -511,11 +540,7 @@ bool PNGEqualData_IDAT(const struct PNGChunkData_IDAT *obj1, const struct PNGChu
 
   if (obj1->data_size != obj2->data_size)
     return false;
-  for (int i = 0; i < obj1->data_size; ++i)
-    if (obj1->data[i] != obj2->data[i])
-      return false;
-
-  return true;
+  return 0 == memcmp(obj1->data, obj2->data, obj1->data_size);
 }
 
 void PNGInitData_sBIT(struct PNGChunkData_sBIT *obj) {
@@ -537,9 +562,11 @@ struct PNGChunkData_sBIT *PNGLoadData_sBIT(const uint8_t *data, int data_size) {
 }
 
 int PNGWriteData_sBIT(const struct PNGChunkData_sBIT *data, uint8_t *out) {
-  // TODO IMPLEMENT
-  assert(false && "Not implemented");
-  return 0;
+  assert(data);
+
+  if (out)
+    WriteNetworkAndAdvanceBytes(&out, data->bytes, 4);
+  return 4;
 }
 
 void PNGFreeData_sBIT(struct PNGChunkData_sBIT *data) {
@@ -552,11 +579,7 @@ bool PNGEqualData_sBIT(const struct PNGChunkData_sBIT *obj1, const struct PNGChu
   if (!obj1 || !obj2)
     return false;
 
-  for (int i = 0; i < 4; ++i)
-    if (obj1->bytes[i] != obj2->bytes[i])
-      return false;
-
-  return true;
+  return 0 == memcmp(obj1->bytes, obj2->bytes, 4);
 }
 
 void PNGInitData_UnknownData(struct PNGChunkData_UnknownData *obj) {
@@ -584,9 +607,11 @@ struct PNGChunkData_UnknownData *PNGLoadData_UnknownData(const uint8_t *data, in
 }
 
 int PNGWriteData_UnknownData(const struct PNGChunkData_UnknownData *data, uint8_t *out) {
-  // TODO IMPLEMENT
-  assert(false && "Not implemented");
-  return 0;
+  assert(data);
+
+  if (out)
+    WriteNetworkAndAdvanceBytes(&out, data->data, data->data_size);
+  return data->data_size;
 }
 
 void PNGFreeData_UnknownData(struct PNGChunkData_UnknownData *data) {
@@ -603,11 +628,7 @@ bool PNGEqualData_UnknownData(const struct PNGChunkData_UnknownData *obj1,
 
   if (obj1->data_size != obj2->data_size)
     return false;
-  for (int i = 0; i < obj1->data_size; ++i)
-    if (obj1->data[i] != obj2->data[i])
-      return false;
-
-  return true;
+  return 0 == memcmp(obj1->data, obj2->data, obj1->data_size);
 }
 
 void PNGInitData_IEND(struct PNGChunkData_IEND *obj) {
@@ -628,8 +649,7 @@ struct PNGChunkData_IEND *PNGLoadData_IEND(const uint8_t *data, int data_size) {
 }
 
 int PNGWriteData_IEND(const struct PNGChunkData_IEND *data, uint8_t *out) {
-  // TODO IMPLEMENT
-  assert(false && "Not implemented");
+  assert(data);
   return 0;
 }
 

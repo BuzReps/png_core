@@ -9,6 +9,7 @@
 extern "C" {
 #endif
 
+// TODO RENAME TO CHUNK_NAME?
 struct ChunkType {
   union {
     struct {

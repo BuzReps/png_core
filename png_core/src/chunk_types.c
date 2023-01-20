@@ -6,7 +6,7 @@ const struct ChunkType CHUNK_IHDR = {
     .byte1 = 73,
     .byte2 = 72,
     .byte3 = 68,
-    .byte4 = 72,
+    .byte4 = 82,
 };
 
 const struct ChunkType CHUNK_sRGB = {

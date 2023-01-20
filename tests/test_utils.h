@@ -10,6 +10,7 @@
 #include <iostream>
 #include <iterator>
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 #include <tuple>

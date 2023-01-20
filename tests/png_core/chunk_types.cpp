@@ -7,6 +7,35 @@ class ChunkTypesTestSuite : public ::testing::Test {
 private:
 };
 
+/// Test Chunk names types constants
+TEST_F(ChunkTypesTestSuite, TestChunkTypesValues) {
+  static const auto to_vector = [](ChunkType type) {
+    return std::vector<uint8_t>(std::begin(type.byte_array), std::end(type.byte_array));
+  };
+
+  static const auto chunk_type_comp = [](const ChunkType& t1, const ChunkType& t2) {
+    return t1.bytes < t2.bytes;
+  };
+
+  std::map<ChunkType, std::vector<uint8_t>, decltype(chunk_type_comp)> type_to_expected;
+  type_to_expected[CHUNK_IHDR] = {73, 72, 68, 82};
+  type_to_expected[CHUNK_sRGB] = {115, 82, 71, 66};
+  type_to_expected[CHUNK_pHYs] = {112, 72, 89, 115};
+  type_to_expected[CHUNK_tEXt] = {116, 69, 88, 116};
+  type_to_expected[CHUNK_PLTE] = {80, 76, 84, 69};
+  type_to_expected[CHUNK_bKGD] = {98, 75, 71, 68};
+  type_to_expected[CHUNK_IEND] = {73, 69, 78, 68};
+  type_to_expected[CHUNK_gAMA] = {103, 65, 77, 65};
+  type_to_expected[CHUNK_IDAT] = {73, 68, 65, 84};
+  type_to_expected[CHUNK_sBIT] = {115, 66, 73, 84};
+
+  for (const auto& [type, expected] : type_to_expected) {
+    const auto type_vec = to_vector(type);
+    EXPECT_EQ(type_vec, expected);
+    EXPECT_NE(type_vec, to_vector(CHUNK_INVALID));
+  }
+}
+
 TEST_F(ChunkTypesTestSuite, TestChunkTypeValidness) {
   ChunkType valid_chunk;
   valid_chunk.byte1 = 'i';
